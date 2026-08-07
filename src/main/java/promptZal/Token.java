@@ -18,6 +18,7 @@ public class Token {
     private int fila;
     private int columna;
     
+    //Constructor para crear el Token con la informacion necesaria
      public Token(int numero, String lexema, tipoToken tipo, int fila, int columna) {
         this.numero = numero;
         this.lexema = lexema;
@@ -26,7 +27,7 @@ public class Token {
         this.columna = columna;
     }
      // Obteniendo los valores de cada atributo
-      public int getNumero() {
+    public int getNumero() {
         return numero;
     }
 
