@@ -17,12 +17,16 @@ public class Archivo {
     //Ruta y contenido completo del archivo (.pz)
     
     public String leerArchivo(String ruta){
+        
+        //Para almacenar el contenido del archivo
         StringBuilder contenido = new StringBuilder();
         
         try{
+            //Se abre el archivo para leer el contenido
             BufferedReader lector = new BufferedReader(new FileReader(ruta));
             String linea;
             
+            //Se lee el archivo linea por linea completo, hasta el final
             while((linea = lector.readLine()) != null){
                 contenido.append(linea);
                 contenido.append("\n");
@@ -33,6 +37,7 @@ public class Archivo {
             System.out.println(e.getMessage());
         
         }
+        // Se devuelve todo el contenido del archivo en String
         return contenido.toString();
     
     }
