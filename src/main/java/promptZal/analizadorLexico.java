@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author jesua
  */
 public class analizadorLexico {
-    
+
     private String entrada;
     private int posicion;
     private int fila;
@@ -19,45 +19,282 @@ public class analizadorLexico {
     private int numeroToken;
     private ArrayList<Token> listaTokens;
     private ArrayList<errorLexico> listaErrores;
-    
-    public analizadorLexico (String entrada){
+
+    public analizadorLexico(String entrada) {
         this.entrada = entrada;
         this.posicion = 0;
         this.fila = 1;
         this.columna = 1;
         this.numeroToken = 1;
-        this.listaTokens = new ArrayList<>();   
+
+        this.listaTokens = new ArrayList<>();
         this.listaErrores = new ArrayList<>();
     }
-    
-    public void analizador(){
-        while(posicion < entrada.length()){
+
+    public void analizador() {
+
+        while (posicion < entrada.length()) {
+
             char actual = entrada.charAt(posicion);
+
             System.out.println(
-                    "Carácter: [" + actual + "]"
+                    "Caracter: [" + actual + "]"
                     + " | Fila: " + fila
                     + " | Columna: " + columna
             );
-            
-            if(actual == '\n'){
+
+            if (actual == ' ' || actual == '\t') {
+
+                posicion++;
+                columna++;
+
+            } else if (actual == '\n') {
+
+                posicion++;
                 fila++;
                 columna = 1;
-            }else{
+
+            } else if (actual == '@') {
+
+                int columnaInicio = columna;
+
+                StringBuilder lexema = new StringBuilder();
+                lexema.append(actual);
+
+                posicion++;
                 columna++;
+
+                while (posicion < entrada.length()
+                        && Character.isLetter(entrada.charAt(posicion))) {
+
+                    lexema.append(entrada.charAt(posicion));
+
+                    posicion++;
+                    columna++;
+                }
+
+                String palabra = lexema.toString();
+
+                tipoToken tipo = identificarDirectiva(palabra);
+
+                if (tipo != null) {
+
+                    Token token = new Token(
+                            numeroToken,
+                            palabra,
+                            tipo,
+                            fila,
+                            columnaInicio
+                    );
+
+                    listaTokens.add(token);
+                    numeroToken++;
+
+                } else {
+                    errorLexico error = new errorLexico(
+                            palabra,
+                            "Directiva no reconocida",
+                            fila,
+                            columnaInicio
+                    );
+
+                    listaErrores.add(error);
+                }
+                
+                
+                //**************CADENAS*****************
+            } else if(actual == '"' ){
+                int filaInicio = fila;
+                int columnaInicio = columna;
+                StringBuilder lexema = new StringBuilder();
+                
+                lexema.append(actual);
+                
+                posicion++;
+                columna++;
+                boolean cerrada = false;
+               while (posicion < entrada.length()){
+                   char caracter = entrada.charAt(posicion);
+                   
+                   if (caracter == '"'){
+                       lexema.append(caracter);
+                       
+                       posicion++;
+                       columna++;
+                       cerrada = true;
+                       break;
+                   }
+                   if(caracter == '\n'){
+                       break;
+                   }
+                   lexema.append(caracter);
+                   posicion++;
+                   columna++;
+            }
+               if (cerrada){
+                   Token token = new Token(numeroToken, lexema.toString(), tipoToken.CADENA
+                   , filaInicio,columnaInicio);
+                   listaTokens.add(token);
+                   numeroToken++;
+               }else{
+                   errorLexico error = new errorLexico(lexema.toString(), "Cadena sin cerrar",
+                   filaInicio, columnaInicio);
+                   listaErrores.add(error);
+               }
+            
             }
             
-            posicion++;
+            //****************NUMEROS*******************
+            else if(Character.isDigit(actual)){
+                int columnaInicio = columna;
+                StringBuilder lexema = new StringBuilder();
+                boolean tieneDecimal = false;
+                
+                while(posicion < entrada.length()){
+                    char caracter = entrada.charAt(posicion);
+                    
+                    if(Character.isDigit(caracter)){
+                        lexema.append(caracter);
+                        posicion++;
+                        columna++;
+                    }else if(caracter == '.' && !tieneDecimal){
+                        tieneDecimal = true;
+                        lexema.append(caracter);
+                        posicion++;
+                        columna++;
+                    }else{
+                        break;
+                    }
+                }
+                String numero = lexema.toString();
+                
+                if(tieneDecimal){
+                    Token token = new Token(numeroToken, numero, tipoToken.DECIMAL, fila, columnaInicio);
+                    listaTokens.add(token);
+                    numeroToken++;
+                }else{
+                    Token token = new Token(numeroToken, numero, tipoToken.ENTERO, fila, columnaInicio);
+                    listaTokens.add(token);
+                    numeroToken++;
+                
+                }
+            
+            }
+            
+            
+            // ***********IDENTIFICADORES Y PALABRAS RESERVADAS**************
+            else if (Character.isLetter(actual) || actual == '_') {
 
+                // Guarda la columna donde comienza el token
+                int columnaInicio = columna;
+
+                StringBuilder lexema = new StringBuilder();
+
+                while (posicion < entrada.length()
+                        && (Character.isLetterOrDigit(entrada.charAt(posicion))
+                        || entrada.charAt(posicion) == '_')) {
+
+                    // Agrega el carácter al lexema
+                    lexema.append(entrada.charAt(posicion));
+
+                    posicion++;
+                    columna++;
+                }
+
+                // Convierte el lexema a String
+                String palabra = lexema.toString();
+
+                // Determina que tipo de token es
+                tipoToken tipo = identificarPalabra(palabra);
+
+                // Crea el token
+                Token token = new Token(
+                        numeroToken,
+                        palabra,
+                        tipo,
+                        fila,
+                        columnaInicio
+                );
+
+                listaTokens.add(token);
+                numeroToken++;
+                
+                
+                //*************CARACTER NO RECONOCIDO*****************
+            } else {
+
+                errorLexico error = new errorLexico(
+                        String.valueOf(actual),
+                        "Caracter no reconocido",
+                        fila,
+                        columna
+                );
+
+                listaErrores.add(error);
+
+                posicion++;
+                columna++;
+            }
         }
-    
     }
     
-    public ArrayList<Token> getlistaTokens(){
+
+    private tipoToken identificarDirectiva(String lexema) {
+
+        if (lexema.equals("@modelo")
+                || lexema.equals("@rol")
+                || lexema.equals("@formato")) {
+
+            return tipoToken.DIRECTIVA;
+        }
+
+        return null;
+    }
+
+    private tipoToken identificarPalabra(String lexema) {
+
+        if (lexema.equals("AGENTE")
+                || lexema.equals("contexto")
+                || lexema.equals("variable")
+                || lexema.equals("EJECUTAR")
+                || lexema.equals("EXPORTAR")) {
+
+            return tipoToken.PALABRA_RESERVADA;
+        }
+
+        if (lexema.equals("PREGUNTAR")
+                || lexema.equals("GENERAR")
+                || lexema.equals("RESUMIR")
+                || lexema.equals("ANALIZAR")
+                || lexema.equals("TRADUCIR")
+                || lexema.equals("CLASIFICAR")
+                || lexema.equals("EXTRAER")) {
+
+            return tipoToken.COMANDO_IA;
+        }
+
+        if (lexema.equals("SOBRE")
+                || lexema.equals("DESDE")
+                || lexema.equals("EN")
+                || lexema.equals("COMO")) {
+
+            return tipoToken.CONECTOR;
+        }
+
+        if (lexema.equals("CARGAR")) {
+
+            return tipoToken.FUNCION;
+        }
+
+        return tipoToken.IDENTIFICADOR;
+    }
+
+    
+    public ArrayList<Token> getlistaTokens() {
         return listaTokens;
     }
-    
-    public ArrayList<errorLexico> getlistaErrores(){
+
+    public ArrayList<errorLexico> getlistaErrores() {
         return listaErrores;
     }
-            
 }
