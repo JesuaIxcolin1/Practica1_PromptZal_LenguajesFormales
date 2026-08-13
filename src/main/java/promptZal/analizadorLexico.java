@@ -219,9 +219,46 @@ public class analizadorLexico {
                 listaTokens.add(token);
                 numeroToken++;
                 
+                // **************CONECTOR************************
+            }else if (actual == '-' && posicion+1 < entrada.length()
+                    && entrada.charAt(posicion+1) == '>'){
                 
-                //*************CARACTER NO RECONOCIDO*****************
-            } else {
+                int columnaInicio = columna;
+                Token token = new Token(numeroToken,"->",tipoToken.CONECTOR,fila,columnaInicio);
+                listaTokens.add(token);
+                numeroToken++;
+                
+                //Avanza dos posiciones por que el conector posee dos caracteres
+                posicion+=2;
+                columna+=2;
+               
+            // ******************OPERADORES***********************    
+            }else if(actual == '='  ||  actual == '+'){
+                int columnaInicio = columna;
+                Token token = new Token(numeroToken, String.valueOf(actual), tipoToken.OPERADOR,
+                fila, columnaInicio);
+                
+                listaTokens.add(token);
+                numeroToken++;
+                posicion++;
+                columna++;
+        
+                    
+            //*********************DELIMITADORES************************        
+            }else if(actual == '{'|| actual == '}'|| actual == '('|| actual == ')'|| actual == ','){
+                int columnaInicio = columna;
+                Token token = new Token(numeroToken, String.valueOf(actual), tipoToken.DELIMITADOR
+                , fila, columnaInicio);
+            
+                listaTokens.add(token);
+                numeroToken++;
+                posicion++;
+                columna++;
+            
+
+            
+            //*************CARACTER NO RECONOCIDO*****************
+            }else {
 
                 errorLexico error = new errorLexico(
                         String.valueOf(actual),

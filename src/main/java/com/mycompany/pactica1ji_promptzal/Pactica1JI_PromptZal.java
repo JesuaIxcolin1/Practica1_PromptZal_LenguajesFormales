@@ -17,7 +17,7 @@ public class Pactica1JI_PromptZal {
     public static void main(String[] args) {
 
         // Texto de prueba para nuestro analizador
-        String texto = "\"Hola mundo\" 10 80 0.7 3.1416 \"HOLA";
+        String texto = "variable resultado = texto + otro -> final { } ( ) ,";
 
         // Creamos el analizador léxico
         analizadorLexico analizador = new analizadorLexico(texto);
