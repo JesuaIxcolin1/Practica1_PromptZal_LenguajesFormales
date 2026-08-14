@@ -33,8 +33,12 @@ public class errorLexico {
         return tipoError;
     }
     
-    public int Fila(){
+    public int getFila(){
         return fila;
+    }
+    
+    public int getColumna(){
+        return columna;
     }
     
     //Setters

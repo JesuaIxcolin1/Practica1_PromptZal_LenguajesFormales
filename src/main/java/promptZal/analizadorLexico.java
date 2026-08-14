@@ -42,19 +42,68 @@ public class analizadorLexico {
                     + " | Fila: " + fila
                     + " | Columna: " + columna
             );
+            
+            //*********************ESPACIOS Y TABULACIONES************************
 
             if (actual == ' ' || actual == '\t') {
 
                 posicion++;
                 columna++;
-
+                
+                
+            //*********************SALTOS DE LINEA*****************************
             } else if (actual == '\n') {
 
                 posicion++;
                 fila++;
                 columna = 1;
-
-            } else if (actual == '@') {
+                
+                
+            //*******************COMENTARIOS********************
+            }else if(actual == '/' && posicion+1 < entrada.length() && entrada.charAt(posicion+1)== '/'){
+                
+                // Avanza dos caracteres por (//)
+                posicion+=2;
+                columna+=2;
+                
+                while(posicion < entrada.length() && entrada.charAt(posicion) != '\n'){
+                    posicion++;
+                    columna++;
+                
+                }
+                
+                
+            //*********************COMENTARIOS DE BLOQUE*********************    
+            }else if(actual == '/' && posicion +1 < entrada.length() && entrada.charAt(posicion +1 )=='*'){
+                
+                //Avanza dos caracteres por (/*)
+                posicion +=2;
+                columna +=2;
+                
+                while(posicion < entrada.length()){
+                   if(entrada.charAt(posicion)== '*' && posicion +1 < entrada.length() && entrada.charAt(posicion +1 )== '/'){
+                       
+                       posicion +=2;
+                       columna+=2;
+                       break;
+                   } 
+                   
+                   if(entrada.charAt(posicion) == '\n'){
+                       posicion++;
+                       fila++;
+                       columna = 1;
+                   
+                   }else {
+                       posicion++;
+                       columna++;
+                   }
+                    
+                }
+            
+            
+            
+            //*************************DIRECTIVAS*************************
+            }else if (actual == '@') {
 
                 int columnaInicio = columna;
 
