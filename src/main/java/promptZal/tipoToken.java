@@ -15,12 +15,12 @@ public enum tipoToken {
     PALABRA_RESERVADA,
     COMANDO_IA,
     CONECTOR,
-    FUNCION,
     IDENTIFICADOR,
     CADENA,
+    OPERADOR,
+    FUNCION,
     ENTERO,
     DECIMAL,
-    OPERADOR,
     DELIMITADOR;
     
 }

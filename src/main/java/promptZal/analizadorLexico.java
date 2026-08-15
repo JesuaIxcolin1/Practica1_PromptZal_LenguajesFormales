@@ -37,14 +37,9 @@ public class analizadorLexico {
 
             char actual = entrada.charAt(posicion);
 
-            System.out.println(
-                    "Caracter: [" + actual + "]"
-                    + " | Fila: " + fila
-                    + " | Columna: " + columna
-            );
             
             //*********************ESPACIOS Y TABULACIONES************************
-
+            //Se ignoran pero se actualiza la posicion
             if (actual == ' ' || actual == '\t') {
 
                 posicion++;
@@ -52,6 +47,7 @@ public class analizadorLexico {
                 
                 
             //*********************SALTOS DE LINEA*****************************
+            // Aumenta la fila y la columna vuelve a 1
             } else if (actual == '\n') {
 
                 posicion++;
@@ -60,6 +56,7 @@ public class analizadorLexico {
                 
                 
             //*******************COMENTARIOS********************
+            // Ignora los comentarios
             }else if(actual == '/' && posicion+1 < entrada.length() && entrada.charAt(posicion+1)== '/'){
                 
                 // Avanza dos caracteres por (//)
@@ -106,13 +103,13 @@ public class analizadorLexico {
             }else if (actual == '@') {
 
                 int columnaInicio = columna;
-
+                //Construye el lexema carter por caracter
                 StringBuilder lexema = new StringBuilder();
                 lexema.append(actual);
 
                 posicion++;
                 columna++;
-
+                //Se leen las letas que forman la directiva
                 while (posicion < entrada.length()
                         && Character.isLetter(entrada.charAt(posicion))) {
 
@@ -123,7 +120,7 @@ public class analizadorLexico {
                 }
 
                 String palabra = lexema.toString();
-
+                //Verifica si la directiva pertenece al lenguaje
                 tipoToken tipo = identificarDirectiva(palabra);
 
                 if (tipo != null) {
@@ -162,6 +159,8 @@ public class analizadorLexico {
                 posicion++;
                 columna++;
                 boolean cerrada = false;
+                
+                //Lee el la cadena hasta encontrar la comilla de cierre
                while (posicion < entrada.length()){
                    char caracter = entrada.charAt(posicion);
                    
@@ -173,6 +172,7 @@ public class analizadorLexico {
                        cerrada = true;
                        break;
                    }
+                   // Si hay salto de line, no es una cadena
                    if(caracter == '\n'){
                        break;
                    }
@@ -197,6 +197,8 @@ public class analizadorLexico {
             else if(Character.isDigit(actual)){
                 int columnaInicio = columna;
                 StringBuilder lexema = new StringBuilder();
+                
+                //Para distinguir entre entero y decimal
                 boolean tieneDecimal = false;
                 
                 while(posicion < entrada.length()){
@@ -217,6 +219,7 @@ public class analizadorLexico {
                 }
                 String numero = lexema.toString();
                 
+                // Si aparecio un punto lo registra como decimal
                 if(tieneDecimal){
                     Token token = new Token(numeroToken, numero, tipoToken.DECIMAL, fila, columnaInicio);
                     listaTokens.add(token);
@@ -242,21 +245,17 @@ public class analizadorLexico {
                 while (posicion < entrada.length()
                         && (Character.isLetterOrDigit(entrada.charAt(posicion))
                         || entrada.charAt(posicion) == '_')) {
-
-                    // Agrega el carácter al lexema
                     lexema.append(entrada.charAt(posicion));
 
                     posicion++;
                     columna++;
                 }
 
-                // Convierte el lexema a String
                 String palabra = lexema.toString();
-
-                // Determina que tipo de token es
+                
+                // Reconoce el tipo de Token
                 tipoToken tipo = identificarPalabra(palabra);
 
-                // Crea el token
                 Token token = new Token(
                         numeroToken,
                         palabra,
@@ -267,6 +266,7 @@ public class analizadorLexico {
 
                 listaTokens.add(token);
                 numeroToken++;
+                
                 
                 // **************CONECTOR************************
             }else if (actual == '-' && posicion+1 < entrada.length()
@@ -324,7 +324,7 @@ public class analizadorLexico {
         }
     }
     
-
+    // Se comprueba si el lexema es una directiva valida
     private tipoToken identificarDirectiva(String lexema) {
 
         if (lexema.equals("@modelo")
@@ -336,9 +336,11 @@ public class analizadorLexico {
 
         return null;
     }
-
+    
+   
     private tipoToken identificarPalabra(String lexema) {
-
+        
+        // PALABRAS RESERVADAS
         if (lexema.equals("AGENTE")
                 || lexema.equals("contexto")
                 || lexema.equals("variable")
@@ -347,7 +349,8 @@ public class analizadorLexico {
 
             return tipoToken.PALABRA_RESERVADA;
         }
-
+        
+        //COMANDOS DE IA
         if (lexema.equals("PREGUNTAR")
                 || lexema.equals("GENERAR")
                 || lexema.equals("RESUMIR")
@@ -358,7 +361,8 @@ public class analizadorLexico {
 
             return tipoToken.COMANDO_IA;
         }
-
+        
+        //CONECTORES
         if (lexema.equals("SOBRE")
                 || lexema.equals("DESDE")
                 || lexema.equals("EN")
@@ -366,12 +370,14 @@ public class analizadorLexico {
 
             return tipoToken.CONECTOR;
         }
-
+        
+        //COMANDO DE IA
         if (lexema.equals("CARGAR")) {
 
             return tipoToken.FUNCION;
         }
-
+        
+        //En caso de no reconocer los anteriores, es un identificador
         return tipoToken.IDENTIFICADOR;
     }
 

@@ -52,10 +52,13 @@ public class reporteHTML {
             
             //Recorre la lista de Tokens
             for(Token token : listaTokens){
+                
+                String color = colorTokens(token.getTipo());
+                
                 archivo.write("<tr>\n");
                 archivo.write("<td>"+token.getNumero()+ "</td>\n");
                 archivo.write("<td>"+token.getLexema()+ "</td>\n");
-                archivo.write("<td>"+token.getTipo()+ "</td>\n");
+                archivo.write("<td style=\"background-color: "+ color+ "; font-weight: bold;\">"+ token.getTipo()+ "</td>\n");
                 archivo.write("<td>"+token.getFila()+ "</td>\n");
                 archivo.write("<td>"+token.getColumna()+ "</td>\n");
                 archivo.write("</tr>\n");
@@ -106,23 +109,26 @@ public class reporteHTML {
             
             // Si no hay errores
             if(listaErrores.isEmpty()){
-                archivo.write("<p>No se encontraron Errores Lexicos</p>\n");
+                archivo.write("<h2>NO SE ENCONTRARON ERRORES LEXICOS</h2>\n");
                 
             }else{
                 archivo.write("<table>\n");
 
                 archivo.write("<tr>\n");
-                archivo.write("<th>Lexema</th>\n");
-                archivo.write("<th>Tipo de Error</th>\n");
-                archivo.write("<th>Fila</th>\n");
-                archivo.write("<th>Columna</th>\n");
+                archivo.write("<th>LEXEMA</th>\n");
+                archivo.write("<th>TIPO DE ERRORR</th>\n");
+                archivo.write("<th>FILA</th>\n");
+                archivo.write("<th>COLUMNA</th>\n");
                 archivo.write("</tr>\n");
                 
                 //Recorre la lista de errores
                 for(errorLexico error : listaErrores){
+                    
+                    String color = colorErrores(error.getTipoError());
+                    
                     archivo.write("<tr>\n");
                     archivo.write("<td>"+error.getLexema()+"</td>\n");
-                    archivo.write("<td>"+error.getTipoError()+"</td>\n");
+                    archivo.write("<td style=\"background-color: "+ color+ "; font-weight: bold;\">"+ error.getTipoError()+ "</td>\n");
                     archivo.write("<td>"+error.getFila()+"</td>\n");
                     archivo.write("<td>"+error.getColumna()+"</td>\n");
                     archivo.write("</tr>\n");
@@ -147,4 +153,63 @@ public class reporteHTML {
     
     }
     
+    private String colorTokens(tipoToken tipo) {
+
+    switch (tipo) {
+
+        case DIRECTIVA:
+            return "#C29E4A";
+
+        case PALABRA_RESERVADA:
+            return "#85513C";
+
+        case COMANDO_IA:
+            return "#224D3A";
+
+        case CONECTOR:
+            return "#FFB74D";
+
+        case FUNCION:
+            return "#46748C";
+
+        case IDENTIFICADOR:
+            return "#468C7D";
+
+        case CADENA:
+            return "#2A376E";
+
+        case ENTERO:
+            return "#998440";
+
+        case DECIMAL:
+            return "#287A77";
+
+        case OPERADOR:
+            return "#FFF176";
+
+        case DELIMITADOR:
+            return "#81D4FA";
+
+        default:
+            return "#FFFFFF";
+        }
+    }
+    
+    private String colorErrores(String tipoError) {
+
+    switch (tipoError) {
+
+        case "Directiva no reconocida":
+            return "#468C7D";
+
+        case "Caracter no reconocido":
+            return "#224D3A";
+
+        case "Cadena sin cerrar":
+            return "#85513C";
+
+        default:
+            return "#E0E0E0";
+        }
+    }   
 }
