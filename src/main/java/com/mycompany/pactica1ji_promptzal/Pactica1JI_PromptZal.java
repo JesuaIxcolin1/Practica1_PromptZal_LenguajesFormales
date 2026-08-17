@@ -4,6 +4,7 @@
 
 package com.mycompany.pactica1ji_promptzal;
 
+import java.io.File;
 import java.util.Scanner;
 import promptZal.Archivo;
 import promptZal.Token;
@@ -24,17 +25,27 @@ public class Pactica1JI_PromptZal {
         System.out.println("=========================================PROMPTZAL=======================================");
         System.out.println("=========================================================================================");
         System.out.println("\n");
-        System.out.println("Ingrese la ruta del archivo .pz: ");
         
-        String ruta = scanner.nextLine();
-        if (!ruta.endsWith(".pz")) {
-
-            System.out.println(
-                    "Error: el archivo debe tener extension .pz"
-            );
-
-            scanner.close();
-            return;
+        String ruta;
+        
+        while(true){
+            System.out.println("Ingrese la ruta del archivo .pz:");
+            ruta = scanner.nextLine();
+            
+            if(!ruta.endsWith(".pz")){
+                System.out.println("Error: el archivo debe contener extension .pz");
+                System.out.println("Intente nuevamente porfavor \n");
+                continue;
+            }
+            
+            File archivoExiste = new File(ruta);
+            if(!archivoExiste.exists()){
+                System.out.println("Error: el archivo ingresado no existe");
+                System.out.println("Intente nuevamente porfavor \n");
+                continue;
+            }
+            break;
+        
         }
         
         Archivo archivo = new Archivo();
