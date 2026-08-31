@@ -17,6 +17,7 @@ public class analizadorLexico {
     private int fila;
     private int columna;
     private int numeroToken;
+    private estadoAFD estado;
     private ArrayList<Token> listaTokens;
     private ArrayList<errorLexico> listaErrores;
 
@@ -26,6 +27,8 @@ public class analizadorLexico {
         this.fila = 1;
         this.columna = 1;
         this.numeroToken = 1;
+        
+        this.estado = estadoAFD.INICIAL;
 
         this.listaTokens = new ArrayList<>();
         this.listaErrores = new ArrayList<>();
@@ -59,6 +62,7 @@ public class analizadorLexico {
             // Ignora los comentarios
             }else if(actual == '/' && posicion+1 < entrada.length() && entrada.charAt(posicion+1)== '/'){
                 
+                estado = estadoAFD.COMENTARIO_LINEA;
                 // Avanza dos caracteres por (//)
                 posicion+=2;
                 columna+=2;
@@ -68,10 +72,14 @@ public class analizadorLexico {
                     columna++;
                 
                 }
+            // Regresa al estado inicial
+            estado = estadoAFD.INICIAL;
                 
                 
             //*********************COMENTARIOS DE BLOQUE*********************    
             }else if(actual == '/' && posicion +1 < entrada.length() && entrada.charAt(posicion +1 )=='*'){
+                
+                estado = estadoAFD.COMENTARIO_BLOQUE;
                 
                 //Avanza dos caracteres por (/*)
                 posicion +=2;
@@ -96,11 +104,15 @@ public class analizadorLexico {
                    }
                     
                 }
+                
+                estado = estadoAFD.INICIAL;
             
             
             
             //*************************DIRECTIVAS*************************
             }else if (actual == '@') {
+                
+                estado = estadoAFD.DIRECTIVA;
 
                 int columnaInicio = columna;
                 //Construye el lexema carter por caracter
@@ -147,9 +159,14 @@ public class analizadorLexico {
                     listaErrores.add(error);
                 }
                 
+                estado = estadoAFD.INICIAL;
+                
                 
                 //**************CADENAS*****************
             } else if(actual == '"' ){
+                
+                estado = estadoAFD.CADENA;
+                
                 int filaInicio = fila;
                 int columnaInicio = columna;
                 StringBuilder lexema = new StringBuilder();
@@ -190,11 +207,15 @@ public class analizadorLexico {
                    filaInicio, columnaInicio);
                    listaErrores.add(error);
                }
+               
+               estado = estadoAFD.INICIAL;
             
             }
             
             //****************NUMEROS*******************
             else if(Character.isDigit(actual)){
+                
+                estado = estadoAFD.ENTERO;
                 int columnaInicio = columna;
                 StringBuilder lexema = new StringBuilder();
                 
@@ -209,6 +230,9 @@ public class analizadorLexico {
                         posicion++;
                         columna++;
                     }else if(caracter == '.' && !tieneDecimal){
+                        
+                        estado = estadoAFD.DECIMAL;
+                        
                         tieneDecimal = true;
                         lexema.append(caracter);
                         posicion++;
@@ -217,6 +241,7 @@ public class analizadorLexico {
                         break;
                     }
                 }
+                
                 String numero = lexema.toString();
                 
                 // Si aparecio un punto lo registra como decimal
@@ -230,12 +255,16 @@ public class analizadorLexico {
                     numeroToken++;
                 
                 }
+                
+                estado = estadoAFD.INICIAL;
             
             }
             
             
             // ***********IDENTIFICADORES Y PALABRAS RESERVADAS**************
             else if (Character.isLetter(actual) || actual == '_') {
+                
+                estado = estadoAFD.IDENTIFICADOR;
 
                 // Guarda la columna donde comienza el token
                 int columnaInicio = columna;
@@ -267,10 +296,14 @@ public class analizadorLexico {
                 listaTokens.add(token);
                 numeroToken++;
                 
+                estado = estadoAFD.INICIAL;
+                
                 
                 // **************CONECTOR************************
             }else if (actual == '-' && posicion+1 < entrada.length()
                     && entrada.charAt(posicion+1) == '>'){
+                
+                estado = estadoAFD.CONECTOR;
                 
                 int columnaInicio = columna;
                 Token token = new Token(numeroToken,"->",tipoToken.CONECTOR,fila,columnaInicio);
@@ -280,9 +313,14 @@ public class analizadorLexico {
                 //Avanza dos posiciones por que el conector posee dos caracteres
                 posicion+=2;
                 columna+=2;
+                
+                estado = estadoAFD.INICIAL;
                
             // ******************OPERADORES***********************    
             }else if(actual == '='  ||  actual == '+'){
+                
+                estado = estadoAFD.OPERADOR;
+                
                 int columnaInicio = columna;
                 Token token = new Token(numeroToken, String.valueOf(actual), tipoToken.OPERADOR,
                 fila, columnaInicio);
@@ -291,10 +329,14 @@ public class analizadorLexico {
                 numeroToken++;
                 posicion++;
                 columna++;
+                
+                estado = estadoAFD.INICIAL;
         
                     
             //*********************DELIMITADORES************************        
-            }else if(actual == '{'|| actual == '}'|| actual == '('|| actual == ')'|| actual == ','){
+            }else if(actual == '{'|| actual == '}'|| actual == '('|| actual == ')'|| actual == ',' || actual == ';'){
+                
+                estado = estadoAFD.DELIMITADOR;
                 int columnaInicio = columna;
                 Token token = new Token(numeroToken, String.valueOf(actual), tipoToken.DELIMITADOR
                 , fila, columnaInicio);
@@ -303,11 +345,15 @@ public class analizadorLexico {
                 numeroToken++;
                 posicion++;
                 columna++;
+                
+                estado = estadoAFD.INICIAL;
             
 
             
             //*************CARACTER NO RECONOCIDO*****************
             }else {
+                
+                estado = estadoAFD.ERROR;
 
                 errorLexico error = new errorLexico(
                         String.valueOf(actual),
@@ -320,6 +366,8 @@ public class analizadorLexico {
 
                 posicion++;
                 columna++;
+                
+                estado = estadoAFD.INICIAL;
             }
         }
     }
@@ -345,7 +393,8 @@ public class analizadorLexico {
                 || lexema.equals("contexto")
                 || lexema.equals("variable")
                 || lexema.equals("EJECUTAR")
-                || lexema.equals("EXPORTAR")) {
+                || lexema.equals("EXPORTAR")
+                || lexema.equals("CODIFICAR")) {
 
             return tipoToken.PALABRA_RESERVADA;
         }

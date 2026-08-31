@@ -67,14 +67,5 @@ public class Token {
     public void setColumna(int columna) {
         this.columna = columna;
     }
-    
-    @Override
-    public String toString() {
-        return numero + " | "
-                + lexema + " | "
-                + tipo + " | "
-                + fila + " | "
-                + columna;
-    }
-
+   
 }

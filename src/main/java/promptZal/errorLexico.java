@@ -58,11 +58,4 @@ public class errorLexico {
         this.columna = columna;
     }
     
-    @Override
-    public String toString() {
-        return lexema + " | "
-                + tipoError + " | "
-                + fila + " | "
-                + columna;
-    }
 }
