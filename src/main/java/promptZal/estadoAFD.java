@@ -20,6 +20,7 @@ public enum estadoAFD {
     COMENTARIO_BLOQUE,
     ASTERISCO_COMENTARIO,
     CONECTOR,
+    GUION,
     OPERADOR,
     DELIMITADOR,
     ERROR

@@ -392,21 +392,32 @@ public class analizadorLexico {
                 estado = estadoAFD.INICIAL;
                 
                 
-                // **************CONECTOR************************
-            }else if (actual == '-' && posicion+1 < entrada.length()
-                    && entrada.charAt(posicion+1) == '>'){
+                // **************CONECTOR -> ************************
+            }else if (actual == '-' ){
                 
                 estado = estadoAFD.CONECTOR;
                 
+                int filaInicio = fila;
                 int columnaInicio = columna;
-                Token token = new Token(numeroToken,"->",tipoToken.CONECTOR,fila,columnaInicio);
-                listaTokens.add(token);
-                numeroToken++;
                 
-                //Avanza dos posiciones por que el conector posee dos caracteres
-                posicion+=2;
-                columna+=2;
+                posicion++;
+                columna++;
                 
+                if(posicion < entrada.length() && entrada.charAt(posicion) == '>'){
+                    estado = estadoAFD.CONECTOR;
+                    
+                    Token token = new Token(numeroToken, "->", tipoToken.CONECTOR, filaInicio, columnaInicio);
+                    listaTokens.add(token);
+                    numeroToken++;
+                    posicion++;
+                    columna++;
+                    
+                }else{
+                    estado = estadoAFD.ERROR;
+                    
+                    errorLexico error = new errorLexico("-", "Conector Incompleto", filaInicio, columnaInicio);
+                    listaErrores.add(error);
+                }
                 estado = estadoAFD.INICIAL;
                
             // ******************OPERADORES***********************    
